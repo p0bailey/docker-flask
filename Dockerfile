@@ -11,9 +11,6 @@ RUN apt-get -y install  openssh-server nginx vim wget sed python-pip python-dev 
 RUN sed -i -e 's/without-password/yes/g' /etc/ssh/sshd_config
 RUN echo 'root:toor' | chpasswd
 
-
-#RUN pip install uwsgi flask
-
 COPY requirements.txt /var/www/
 RUN pip install -r /var/www/requirements.txt
 
