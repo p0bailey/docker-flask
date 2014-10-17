@@ -6,10 +6,7 @@ MAINTAINER Phillip Bailey <phillip@bailey.st>
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update
-RUN apt-get -y install  openssh-server nginx vim wget sed python-pip python-dev uwsgi-plugin-python supervisor
-
-RUN sed -i -e 's/without-password/yes/g' /etc/ssh/sshd_config
-RUN echo 'root:toor' | chpasswd
+RUN apt-get -y install nginx vim wget sed python-pip python-dev uwsgi-plugin-python supervisor
 
 COPY requirements.txt /var/www/
 RUN pip install -r /var/www/requirements.txt
@@ -27,7 +24,7 @@ RUN ln -s /etc/nginx/sites-available/flask.conf /etc/nginx/sites-enabled/flask.c
 COPY uwsgi.ini /var/www/app/
 COPY hello.py /var/www/app/
 
-RUN mkdir -p /var/run/sshd /var/log/supervisor
+RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 
