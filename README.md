@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/p0bailey/docker-flask.svg?branch=master)](https://travis-ci.org/p0bailey/docker-flask)
+
+
 This image is a boilerplate for any Flask application,  pages are served by uwsgi and Nginx.
 
 docker run -d p0bailey/docker-flask
