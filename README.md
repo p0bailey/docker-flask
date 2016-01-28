@@ -5,6 +5,8 @@ This image is a boilerplate for any Flask application,  pages are served by uwsg
 
 docker run -d p0bailey/docker-flask
 
+On Docker machine run: docker run -d -p 80:80 p0bailey/docker-flask
+
 Source code: https://github.com/p0bailey/docker-flask
 
 ![Hello Flask][2]
