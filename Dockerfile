@@ -1,30 +1,21 @@
-
 FROM ubuntu:14.04
-
 MAINTAINER Phillip Bailey <phillip@bailey.st>
 
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update
-RUN apt-get -y install nginx  sed python-pip python-dev uwsgi-plugin-python supervisor
-
-RUN mkdir -p /var/log/nginx/app
-RUN mkdir -p /var/log/uwsgi/app/
-
-
-RUN rm /etc/nginx/sites-enabled/default
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python-pip python-dev uwsgi-plugin-python \
+    nginx supervisor
 COPY flask.conf /etc/nginx/sites-available/
-RUN ln -s /etc/nginx/sites-available/flask.conf /etc/nginx/sites-enabled/flask.conf
-COPY uwsgi.ini /var/www/app/
-RUN echo "daemon off;" >> /etc/nginx/nginx.conf
-
-
-RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY app /var/www/app
 
-copy app /var/www/app
-RUN pip install -r /var/www/app/requirements.txt
-
-#EXPOSE 80
+RUN mkdir -p /var/log/{nginx,uwsgi}/app /var/log/supervisor \
+    && rm /etc/nginx/sites-enabled/default \
+    && ln -s /etc/nginx/sites-available/flask.conf /etc/nginx/sites-enabled/flask.conf \
+    && echo "daemon off;" >> /etc/nginx/nginx.conf \
+    &&  pip install -r /var/www/app/requirements.txt \
+    && chown -R www-data:www-data /var/www/app \
+    && chown -R www-data:www-data /var/log
 
 CMD ["/usr/bin/supervisord"]
