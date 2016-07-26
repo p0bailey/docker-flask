@@ -10,7 +10,7 @@ COPY flask.conf /etc/nginx/sites-available/
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY app /var/www/app
 
-RUN mkdir -p /var/log/{nginx,uwsgi}/app /var/log/supervisor \
+RUN mkdir -p /var/log/nginx/app /var/log/uwsgi/app /var/log/supervisor \
     && rm /etc/nginx/sites-enabled/default \
     && ln -s /etc/nginx/sites-available/flask.conf /etc/nginx/sites-enabled/flask.conf \
     && echo "daemon off;" >> /etc/nginx/nginx.conf \
