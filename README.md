@@ -4,7 +4,6 @@
   <img src=".img/1.png" alt="Agentic AI Top 10 Overview" width="500">
 </div>
 
-
 A modern Flask web application containerized with Docker, featuring automated security scanning and comprehensive monitoring capabilities.
 
 ## Overview
