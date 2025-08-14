@@ -1,0 +1,4 @@
+# Trivy security scanner files
+.trivy/
+trivy.yaml
+reports/

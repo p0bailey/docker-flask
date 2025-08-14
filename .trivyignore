@@ -1,0 +1,38 @@
+# Trivy ignore file
+# Format: https://aquasecurity.github.io/trivy/latest/docs/vulnerability/examples/filter/
+
+# Ignore test files and development dependencies
+**/test/**
+**/tests/**
+**/*test*
+**/node_modules/**
+**/.git/**
+**/.pytest_cache/**
+**/__pycache__/**
+
+# Ignore specific low-impact vulnerabilities (example)
+# CVE-2023-xxxxx
+
+# Ignore base image vulnerabilities that cannot be fixed
+# debian:bookworm-slim known issues
+# CVE-2024-xxxxx
+
+# Ignore supervisor-related root user requirement  
+AVD-DS-0002
+
+# Ignore documentation and example files
+**/docs/**
+**/examples/**
+**/*.md
+**/*.txt
+LICENSE
+README*
+
+# Ignore static assets
+**/static/**
+**/assets/**
+**/*.css
+**/*.js
+**/*.png
+**/*.jpg
+**/*.gif
