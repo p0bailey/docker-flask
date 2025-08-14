@@ -5,6 +5,7 @@
 </div>
 
 
+
 A modern Flask web application containerized with Docker, featuring automated security scanning and comprehensive monitoring capabilities.
 
 ## Overview
