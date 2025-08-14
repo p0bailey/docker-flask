@@ -4,81 +4,378 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="">
-  <meta name="author" content="">
-  <link rel="icon" href="../../favicon.ico">
+  <meta name="description" content="Modern Flask Docker Application">
+  <meta name="author" content="Flask Docker Team">
+  
+  <title>🐍 Flask Docker App</title>
 
-  <title>HELLO FLASK!!!</title>
+  <!-- Bootstrap 5 from CDN for modern styling -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <!-- Custom styles -->
+  <style>
+    :root {
+      --primary-color: #667eea;
+      --secondary-color: #764ba2;
+      --accent-color: #f093fb;
+      --text-dark: #2d3748;
+      --text-light: #718096;
+    }
 
-  <!-- Bootstrap core CSS -->
-  <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      min-height: 100vh;
+      margin: 0;
+    }
 
-  <!-- Custom styles for this template -->
-  <link href="jumbotron-narrow.css" rel="stylesheet">
+    .main-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      margin: 2rem auto;
+      max-width: 1200px;
+      overflow: hidden;
+    }
 
-  <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
-  <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-  <script src="/static/js/ie-emulation-modes-warning.js"></script>
+    .hero-section {
+      background: linear-gradient(135deg, var(--accent-color) 0%, var(--primary-color) 100%);
+      color: white;
+      text-align: center;
+      padding: 4rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
 
-  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-  <!--[if lt IE 9]>
-  <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-  <![endif]-->
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-subtitle {
+      font-size: 1.3rem;
+      opacity: 0.9;
+      margin-bottom: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-custom {
+      background: linear-gradient(45deg, #ff6b6b, #feca57);
+      border: none;
+      color: white;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-custom:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      color: white;
+      text-decoration: none;
+    }
+
+    .features-section {
+      padding: 4rem 2rem;
+    }
+
+    .feature-card {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(102, 126, 234, 0.1);
+      height: 100%;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+    }
+
+    .feature-title {
+      color: var(--text-dark);
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .feature-text {
+      color: var(--text-light);
+      line-height: 1.6;
+    }
+
+    .stats-section {
+      background: linear-gradient(135deg, var(--text-dark) 0%, #1a202c 100%);
+      color: white;
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    .stat-item {
+      margin-bottom: 2rem;
+    }
+
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, var(--accent-color), #feca57);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 1.1rem;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .footer-section {
+      background: var(--text-dark);
+      color: white;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .tech-badge {
+      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      margin: 0.25rem;
+      display: inline-block;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title { font-size: 2.5rem; }
+      .main-container { margin: 1rem; }
+      .hero-section { padding: 3rem 1rem; }
+      .features-section { padding: 3rem 1rem; }
+    }
+  </style>
 </head>
 
 <body>
-
-  <div class="container">
-    <div class="header">
-      <nav>
-        <ul class="nav nav-pills pull-right">
-          <li role="presentation" class="active"><a href="#">Home</a></li>
-          <li role="presentation"><a href="#">About</a></li>
-          <li role="presentation"><a href="#">Contact</a></li>
-        </ul>
-      </nav>
-      <h3 class="text-muted">Project name</h3>
-    </div>
-
-    <div class="jumbotron">
-      <h1>Hello Flask!!!</h1>
-      <p class="lead">Cras justo odio, dapibus ac facilisis in, egestas eget quam. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-      <p><a class="btn btn-lg btn-success" href="#" role="button">Sign up today</a></p>
-    </div>
-
-    <div class="row marketing">
-      <div class="col-lg-6">
-        <h4>Subheading</h4>
-        <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>
-
-        <h4>Subheading</h4>
-        <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>
-
-        <h4>Subheading</h4>
-        <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
-      </div>
-
-      <div class="col-lg-6">
-        <h4>Subheading</h4>
-        <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>
-
-        <h4>Subheading</h4>
-        <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>
-
-        <h4>Subheading</h4>
-        <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+  <div class="main-container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <h1 class="hero-title">
+        <i class="fab fa-python"></i> Flask Docker
+      </h1>
+      <p class="hero-subtitle">
+        Modern Python web application running in Docker with Gunicorn & uv
+      </p>
+      <div class="d-flex flex-wrap justify-content-center gap-3">
+        <a href="#features" class="btn-custom">
+          <i class="fas fa-rocket"></i> Explore Features
+        </a>
+        <a href="/security" class="btn-custom" style="background: linear-gradient(45deg, #e74c3c, #c0392b);">
+          <i class="fas fa-shield-alt"></i> Security Report
+        </a>
       </div>
     </div>
 
-    <footer class="footer">
-      <p>&copy; Company 2014</p>
-    </footer>
+    <!-- Tech Stack -->
+    <div class="container py-4 text-center">
+      <div class="tech-badge"><i class="fab fa-python"></i> Python 3.11</div>
+      <div class="tech-badge"><i class="fas fa-flask"></i> Flask 3.0</div>
+      <div class="tech-badge"><i class="fab fa-docker"></i> Docker</div>
+      <div class="tech-badge"><i class="fas fa-server"></i> Gunicorn</div>
+      <div class="tech-badge"><i class="fas fa-bolt"></i> uv Package Manager</div>
+      <div class="tech-badge"><i class="fas fa-shield-alt"></i> Nginx</div>
+    </div>
 
-  </div> <!-- /container -->
+    <!-- Features Section -->
+    <div id="features" class="features-section">
+      <div class="container">
+        <div class="row text-center mb-5">
+          <div class="col-12">
+            <h2 class="display-5 fw-bold" style="color: var(--text-dark);">Why This Stack?</h2>
+            <p class="lead" style="color: var(--text-light);">Modern, fast, and production-ready</p>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-4">
+            <div class="feature-card text-center">
+              <div class="feature-icon">
+                <i class="fas fa-bolt"></i>
+              </div>
+              <h4 class="feature-title">Lightning Fast</h4>
+              <p class="feature-text">
+                Built with uv package manager for blazing fast dependency resolution and Gunicorn for optimal performance.
+              </p>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="feature-card text-center">
+              <div class="feature-icon">
+                <i class="fab fa-docker"></i>
+              </div>
+              <h4 class="feature-title">Containerized</h4>
+              <p class="feature-text">
+                Fully containerized with Docker for consistent deployments across any environment. No more "it works on my machine"!
+              </p>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="feature-card text-center">
+              <div class="feature-icon">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <h4 class="feature-title">Production Ready</h4>
+              <p class="feature-text">
+                Nginx reverse proxy, Gunicorn WSGI server, and supervisor process management for enterprise-grade reliability.
+              </p>
+            </div>
+          </div>
+        </div>
 
+        <div class="row mt-4">
+          <div class="col-md-6">
+            <div class="feature-card">
+              <div class="feature-icon text-start">
+                <i class="fas fa-cogs"></i>
+              </div>
+              <h4 class="feature-title">Modern Architecture</h4>
+              <p class="feature-text">
+                • Python 3.11 with latest Flask framework<br>
+                • uv for ultra-fast package management<br>
+                • Gunicorn replacing legacy uWSGI<br>
+                • Nginx for high-performance reverse proxy
+              </p>
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <div class="feature-card">
+              <div class="feature-icon text-start">
+                <i class="fas fa-rocket"></i>
+              </div>
+              <h4 class="feature-title">Developer Experience</h4>
+              <p class="feature-text">
+                • Simple Makefile commands for easy management<br>
+                • Hot-reload development environment<br>
+                • Comprehensive logging and monitoring<br>
+                • Clean, maintainable codebase
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-  <script src="/static/js/ie10-viewport-bug-workaround.js"></script>
+    <!-- Stats Section -->
+    <div class="stats-section">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="stat-item">
+              <span class="stat-number">3.11</span>
+              <div class="stat-label">Python Version</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-item">
+              <span class="stat-number">21ms</span>
+              <div class="stat-label">Package Install Time</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-item">
+              <span class="stat-number">100%</span>
+              <div class="stat-label">Docker Optimized</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-item">
+              <span class="stat-number">⚡</span>
+              <div class="stat-label">uv Fast</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-section">
+      <div class="container">
+        <div class="row">
+          <div class="col-12">
+            <p class="mb-2">
+              <i class="fas fa-heart" style="color: #ff6b6b;"></i>
+              Built with modern Flask, Docker, and uv
+            </p>
+            <p class="mb-0">
+              <small>&copy; 2025 Flask Docker App | 
+              <a href="https://github.com" class="text-light">
+                <i class="fab fa-github"></i> Source Code
+              </a>
+              </small>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Smooth scrolling -->
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
 </body>
 </html>

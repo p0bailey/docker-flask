@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Trivy Security Report for Flask Docker Application">
+  <meta name="author" content="Flask Docker Team">
+  
+  <title>🔒 Security Report - Flask Docker App</title>
+
+  <!-- Bootstrap 5 and FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" rel="stylesheet">
+  
+  <!-- Custom styles -->
+  <style>
+    :root {
+      --critical-color: #dc3545;
+      --high-color: #fd7e14;
+      --medium-color: #ffc107;
+      --low-color: #28a745;
+      --info-color: #17a2b8;
+      --bg-dark: #1a1d23;
+      --bg-card: #2d3748;
+      --text-primary: #f8f9fa;
+      --text-secondary: #adb5bd;
+      --border-color: #495057;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, #2c3e50 100%);
+      min-height: 100vh;
+      color: var(--text-primary);
+    }
+
+    .navbar {
+      background: rgba(26, 29, 35, 0.95) !important;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .main-container {
+      padding: 2rem 0;
+    }
+
+    .security-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .security-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-header {
+      border-bottom: 1px solid var(--border-color);
+      background: transparent;
+      padding: 1rem 0;
+      margin-bottom: 1rem;
+    }
+
+    .severity-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .severity-critical {
+      background: var(--critical-color);
+      color: white;
+    }
+
+    .severity-high {
+      background: var(--high-color);
+      color: white;
+    }
+
+    .severity-medium {
+      background: var(--medium-color);
+      color: #212529;
+    }
+
+    .severity-low {
+      background: var(--low-color);
+      color: white;
+    }
+
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--critical-color), var(--high-color), var(--medium-color), var(--low-color));
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .vulnerability-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .vulnerability-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--high-color);
+    }
+
+    .vuln-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .vuln-id {
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.875rem;
+      color: var(--info-color);
+      font-weight: 600;
+    }
+
+    .vuln-title {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin: 0.5rem 0;
+      line-height: 1.4;
+    }
+
+    .vuln-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-label {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .detail-value {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .chart-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 15px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      position: relative;
+      height: 400px;
+    }
+
+    .chart-container canvas {
+      max-height: 300px !important;
+      width: 100% !important;
+    }
+
+    .scan-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .status-clean {
+      background: rgba(40, 167, 69, 0.2);
+      color: var(--low-color);
+      border: 1px solid var(--low-color);
+    }
+
+    .status-issues {
+      background: rgba(220, 53, 69, 0.2);
+      color: var(--critical-color);
+      border: 1px solid var(--critical-color);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-secondary);
+    }
+
+    .error {
+      background: rgba(220, 53, 69, 0.1);
+      border: 1px solid var(--critical-color);
+      border-radius: 8px;
+      padding: 1rem;
+      color: var(--critical-color);
+      margin: 1rem 0;
+    }
+
+    .tab-pane {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .nav-pills .nav-link {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .nav-pills .nav-link.active {
+      background: var(--high-color);
+      border-color: var(--high-color);
+      color: white;
+    }
+
+    .metadata {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .back-button {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .back-button:hover {
+      background: var(--high-color);
+      border-color: var(--high-color);
+      color: white;
+      text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+      .summary-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .vuln-details {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="/">
+        <i class="fas fa-shield-alt me-2 text-warning"></i>
+        <span class="text-light">Flask Docker Security</span>
+      </a>
+      <div class="ms-auto">
+        <a href="/" class="back-button">
+          <i class="fas fa-arrow-left me-1"></i> Back to App
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container main-container">
+    <!-- Header -->
+    <div class="text-center mb-4">
+      <h1 class="display-5 fw-bold mb-3">
+        <i class="fas fa-shield-alt text-warning me-3"></i>
+        Security Report
+      </h1>
+      <p class="lead text-secondary">
+        Comprehensive Trivy security analysis for Flask Docker application
+      </p>
+      <div class="metadata">
+        <div class="row">
+          <div class="col-md-4">
+            <strong>Scan Date:</strong> <span id="scan-date">Loading...</span>
+          </div>
+          <div class="col-md-4">
+            <strong>Scanner:</strong> Trivy
+          </div>
+          <div class="col-md-4">
+            <strong>Version:</strong> <span id="trivy-version">Latest</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div id="summary-stats" class="summary-stats">
+      <!-- Populated by JavaScript -->
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="chart-container">
+          <h5 class="mb-3">Vulnerability Distribution</h5>
+          <div style="position: relative; height: 300px;">
+            <canvas id="severityChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="chart-container">
+          <h5 class="mb-3">Scan Results Overview</h5>
+          <div style="position: relative; height: 300px;">
+            <canvas id="scanResultsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Report Tabs -->
+    <div class="security-card">
+      <ul class="nav nav-pills mb-4" id="reportTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="image-tab" data-bs-toggle="pill" data-bs-target="#image-report" type="button" role="tab">
+            <i class="fab fa-docker me-1"></i> Image Scan
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="dockerfile-tab" data-bs-toggle="pill" data-bs-target="#dockerfile-report" type="button" role="tab">
+            <i class="fas fa-file-code me-1"></i> Dockerfile Scan
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="filesystem-tab" data-bs-toggle="pill" data-bs-target="#filesystem-report" type="button" role="tab">
+            <i class="fas fa-folder-open me-1"></i> Filesystem Scan
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="reportTabsContent">
+        <!-- Docker Image Report -->
+        <div class="tab-pane fade show active" id="image-report" role="tabpanel">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4><i class="fab fa-docker me-2"></i>Docker Image Vulnerabilities</h4>
+            <div id="image-status" class="scan-status">
+              <i class="fas fa-spinner fa-spin"></i> Loading...
+            </div>
+          </div>
+          <div id="image-vulnerabilities" class="loading">
+            <i class="fas fa-spinner fa-spin fa-2x mb-3"></i><br>
+            Loading image scan results...
+          </div>
+        </div>
+
+        <!-- Dockerfile Report -->
+        <div class="tab-pane fade" id="dockerfile-report" role="tabpanel">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4><i class="fas fa-file-code me-2"></i>Dockerfile Misconfigurations</h4>
+            <div id="dockerfile-status" class="scan-status">
+              <i class="fas fa-spinner fa-spin"></i> Loading...
+            </div>
+          </div>
+          <div id="dockerfile-issues" class="loading">
+            <i class="fas fa-spinner fa-spin fa-2x mb-3"></i><br>
+            Loading Dockerfile scan results...
+          </div>
+        </div>
+
+        <!-- Filesystem Report -->
+        <div class="tab-pane fade" id="filesystem-report" role="tabpanel">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4><i class="fas fa-folder-open me-2"></i>Filesystem Analysis</h4>
+            <div id="filesystem-status" class="scan-status">
+              <i class="fas fa-spinner fa-spin"></i> Loading...
+            </div>
+          </div>
+          <div id="filesystem-results" class="loading">
+            <i class="fas fa-spinner fa-spin fa-2x mb-3"></i><br>
+            Loading filesystem scan results...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+  <!-- Security Report JavaScript -->
+  <script>
+    class SecurityReportDashboard {
+      constructor() {
+        this.charts = {};
+        this.reportData = {};
+        this.init();
+      }
+
+      async init() {
+        try {
+          await this.loadReportData();
+          this.renderSummaryStats();
+          this.renderCharts();
+          this.renderReports();
+          this.updateScanDate();
+        } catch (error) {
+          console.error('Error loading security reports:', error);
+          this.showError('Failed to load security reports');
+        }
+      }
+
+      async loadReportData() {
+        const reports = ['image-scan', 'dockerfile-scan', 'fs-scan'];
+        
+        for (const report of reports) {
+          try {
+            const response = await fetch(`/api/security-report/${report}`);
+            if (response.ok) {
+              this.reportData[report] = await response.json();
+            } else {
+              console.warn(`Failed to load ${report}:`, response.status);
+              this.reportData[report] = { Results: [] };
+            }
+          } catch (error) {
+            console.warn(`Error loading ${report}:`, error);
+            this.reportData[report] = { Results: [] };
+          }
+        }
+      }
+
+      renderSummaryStats() {
+        const stats = this.calculateStats();
+        const container = document.getElementById('summary-stats');
+        
+        container.innerHTML = `
+          <div class="stat-card">
+            <div class="stat-number text-danger">${stats.critical}</div>
+            <div class="stat-label">Critical</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number text-warning">${stats.high}</div>
+            <div class="stat-label">High</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number text-info">${stats.medium}</div>
+            <div class="stat-label">Medium</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number text-success">${stats.low}</div>
+            <div class="stat-label">Low</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">${stats.total}</div>
+            <div class="stat-label">Total Issues</div>
+          </div>
+        `;
+      }
+
+      calculateStats() {
+        let critical = 0, high = 0, medium = 0, low = 0;
+
+        Object.values(this.reportData).forEach(report => {
+          if (report.Results) {
+            report.Results.forEach(result => {
+              if (result.Vulnerabilities) {
+                result.Vulnerabilities.forEach(vuln => {
+                  switch (vuln.Severity) {
+                    case 'CRITICAL': critical++; break;
+                    case 'HIGH': high++; break;
+                    case 'MEDIUM': medium++; break;
+                    case 'LOW': low++; break;
+                  }
+                });
+              }
+              if (result.Misconfigurations) {
+                result.Misconfigurations.forEach(misc => {
+                  switch (misc.Severity) {
+                    case 'CRITICAL': critical++; break;
+                    case 'HIGH': high++; break;
+                    case 'MEDIUM': medium++; break;
+                    case 'LOW': low++; break;
+                  }
+                });
+              }
+            });
+          }
+        });
+
+        return {
+          critical,
+          high,
+          medium,
+          low,
+          total: critical + high + medium + low
+        };
+      }
+
+      renderCharts() {
+        this.renderSeverityChart();
+        this.renderScanResultsChart();
+      }
+
+      renderSeverityChart() {
+        const stats = this.calculateStats();
+        const ctx = document.getElementById('severityChart').getContext('2d');
+        
+        this.charts.severity = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Critical', 'High', 'Medium', 'Low'],
+            datasets: [{
+              data: [stats.critical, stats.high, stats.medium, stats.low],
+              backgroundColor: [
+                'rgb(220, 53, 69)',
+                'rgb(253, 126, 20)',
+                'rgb(255, 193, 7)',
+                'rgb(40, 167, 69)'
+              ],
+              borderWidth: 2,
+              borderColor: '#2d3748'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            aspectRatio: 1,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  color: '#f8f9fa',
+                  padding: 15
+                }
+              }
+            }
+          }
+        });
+      }
+
+      renderScanResultsChart() {
+        const imageResults = this.reportData['image-scan']?.Results?.length || 0;
+        const dockerfileResults = this.reportData['dockerfile-scan']?.Results?.length || 0;
+        const fsResults = this.reportData['fs-scan']?.Results?.length || 0;
+
+        const ctx = document.getElementById('scanResultsChart').getContext('2d');
+        
+        this.charts.results = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['Image', 'Dockerfile', 'Filesystem'],
+            datasets: [{
+              label: 'Results Found',
+              data: [imageResults, dockerfileResults, fsResults],
+              backgroundColor: [
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(255, 205, 86, 0.8)'
+              ],
+              borderColor: [
+                'rgb(54, 162, 235)',
+                'rgb(255, 99, 132)',
+                'rgb(255, 205, 86)'
+              ],
+              borderWidth: 1,
+              borderRadius: 5
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            aspectRatio: 1.2,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: Math.max(imageResults, dockerfileResults, fsResults) + 2,
+                ticks: {
+                  color: '#f8f9fa',
+                  stepSize: 1
+                },
+                grid: {
+                  color: '#495057'
+                }
+              },
+              x: {
+                ticks: {
+                  color: '#f8f9fa'
+                },
+                grid: {
+                  display: false
+                }
+              }
+            }
+          }
+        });
+      }
+
+      renderReports() {
+        this.renderImageReport();
+        this.renderDockerfileReport();
+        this.renderFilesystemReport();
+      }
+
+      renderImageReport() {
+        const container = document.getElementById('image-vulnerabilities');
+        const statusElement = document.getElementById('image-status');
+        const data = this.reportData['image-scan'];
+
+        if (!data || !data.Results || data.Results.length === 0) {
+          container.innerHTML = '<div class="text-center text-success"><i class="fas fa-check-circle fa-2x mb-3"></i><br>No vulnerabilities found in Docker image</div>';
+          statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Clean';
+          statusElement.className = 'scan-status status-clean';
+          return;
+        }
+
+        let vulnerabilityCount = 0;
+        let html = '';
+
+        data.Results.forEach(result => {
+          if (result.Vulnerabilities && result.Vulnerabilities.length > 0) {
+            html += `<h5 class="mb-3"><i class="fas fa-package me-2"></i>${result.Target}</h5>`;
+            
+            // Sort vulnerabilities by severity (Critical -> High -> Medium -> Low)
+            const severityOrder = { 'CRITICAL': 0, 'HIGH': 1, 'MEDIUM': 2, 'LOW': 3, 'UNKNOWN': 4 };
+            const sortedVulns = result.Vulnerabilities.sort((a, b) => {
+              const severityA = severityOrder[a.Severity] ?? 5;
+              const severityB = severityOrder[b.Severity] ?? 5;
+              if (severityA !== severityB) {
+                return severityA - severityB;
+              }
+              // Secondary sort by VulnerabilityID if same severity
+              return a.VulnerabilityID.localeCompare(b.VulnerabilityID);
+            });
+            
+            sortedVulns.forEach(vuln => {
+              vulnerabilityCount++;
+              html += this.renderVulnerability(vuln);
+            });
+          }
+        });
+
+        if (vulnerabilityCount > 0) {
+          statusElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${vulnerabilityCount} Issues`;
+          statusElement.className = 'scan-status status-issues';
+        } else {
+          statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Clean';
+          statusElement.className = 'scan-status status-clean';
+        }
+
+        container.innerHTML = html || '<div class="text-center text-success"><i class="fas fa-check-circle fa-2x mb-3"></i><br>No vulnerabilities found</div>';
+      }
+
+      renderDockerfileReport() {
+        const container = document.getElementById('dockerfile-issues');
+        const statusElement = document.getElementById('dockerfile-status');
+        const data = this.reportData['dockerfile-scan'];
+
+        if (!data || !data.Results || data.Results.length === 0) {
+          container.innerHTML = '<div class="text-center text-success"><i class="fas fa-check-circle fa-2x mb-3"></i><br>No misconfigurations found in Dockerfile</div>';
+          statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Clean';
+          statusElement.className = 'scan-status status-clean';
+          return;
+        }
+
+        let issueCount = 0;
+        let html = '';
+
+        data.Results.forEach(result => {
+          if (result.Misconfigurations && result.Misconfigurations.length > 0) {
+            // Sort misconfigurations by severity (Critical -> High -> Medium -> Low)
+            const severityOrder = { 'CRITICAL': 0, 'HIGH': 1, 'MEDIUM': 2, 'LOW': 3, 'UNKNOWN': 4 };
+            const sortedMisconfigs = result.Misconfigurations.sort((a, b) => {
+              const severityA = severityOrder[a.Severity] ?? 5;
+              const severityB = severityOrder[b.Severity] ?? 5;
+              if (severityA !== severityB) {
+                return severityA - severityB;
+              }
+              // Secondary sort by ID if same severity
+              return a.ID.localeCompare(b.ID);
+            });
+            
+            sortedMisconfigs.forEach(misc => {
+              issueCount++;
+              html += this.renderMisconfiguration(misc);
+            });
+          }
+        });
+
+        if (issueCount > 0) {
+          statusElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${issueCount} Issues`;
+          statusElement.className = 'scan-status status-issues';
+        } else {
+          statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Clean';
+          statusElement.className = 'scan-status status-clean';
+        }
+
+        container.innerHTML = html || '<div class="text-center text-success"><i class="fas fa-check-circle fa-2x mb-3"></i><br>No misconfigurations found</div>';
+      }
+
+      renderFilesystemReport() {
+        const container = document.getElementById('filesystem-results');
+        const statusElement = document.getElementById('filesystem-status');
+        const data = this.reportData['fs-scan'];
+
+        if (!data || !data.Results || data.Results.length === 0) {
+          container.innerHTML = '<div class="text-center text-success"><i class="fas fa-check-circle fa-2x mb-3"></i><br>No issues found in filesystem scan</div>';
+          statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Clean';
+          statusElement.className = 'scan-status status-clean';
+          return;
+        }
+
+        let issueCount = 0;
+        let html = '';
+        const severityOrder = { 'CRITICAL': 0, 'HIGH': 1, 'MEDIUM': 2, 'LOW': 3, 'UNKNOWN': 4 };
+
+        data.Results.forEach(result => {
+          html += `<h5 class="mb-3"><i class="fas fa-file me-2"></i>${result.Target}</h5>`;
+          
+          // Collect and sort all issues by severity
+          let allIssues = [];
+          
+          if (result.Vulnerabilities && result.Vulnerabilities.length > 0) {
+            result.Vulnerabilities.forEach(vuln => {
+              allIssues.push({type: 'vulnerability', data: vuln, severity: vuln.Severity});
+            });
+          }
+
+          if (result.Secrets && result.Secrets.length > 0) {
+            result.Secrets.forEach(secret => {
+              allIssues.push({type: 'secret', data: secret, severity: 'CRITICAL'});
+            });
+          }
+
+          if (result.Misconfigurations && result.Misconfigurations.length > 0) {
+            result.Misconfigurations.forEach(misc => {
+              allIssues.push({type: 'misconfiguration', data: misc, severity: misc.Severity});
+            });
+          }
+          
+          // Sort all issues by severity
+          allIssues.sort((a, b) => {
+            const severityA = severityOrder[a.severity] ?? 5;
+            const severityB = severityOrder[b.severity] ?? 5;
+            return severityA - severityB;
+          });
+          
+          // Render sorted issues
+          allIssues.forEach(issue => {
+            issueCount++;
+            switch(issue.type) {
+              case 'vulnerability':
+                html += this.renderVulnerability(issue.data);
+                break;
+              case 'secret':
+                html += this.renderSecret(issue.data);
+                break;
+              case 'misconfiguration':
+                html += this.renderMisconfiguration(issue.data);
+                break;
+            }
+          });
+        });
+
+        if (issueCount > 0) {
+          statusElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${issueCount} Issues`;
+          statusElement.className = 'scan-status status-issues';
+        } else {
+          statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Clean';
+          statusElement.className = 'scan-status status-clean';
+        }
+
+        container.innerHTML = html || '<div class="text-center text-success"><i class="fas fa-check-circle fa-2x mb-3"></i><br>No issues found</div>';
+      }
+
+      renderVulnerability(vuln) {
+        const severityClass = `severity-${vuln.Severity.toLowerCase()}`;
+        return `
+          <div class="vulnerability-item">
+            <div class="vuln-header">
+              <span class="vuln-id">${vuln.VulnerabilityID}</span>
+              <span class="severity-badge ${severityClass}">${vuln.Severity}</span>
+            </div>
+            <div class="vuln-title">${vuln.Title || 'No title available'}</div>
+            <div class="vuln-details">
+              <div class="detail-item">
+                <div class="detail-label">Package</div>
+                <div class="detail-value">${vuln.PkgName || 'N/A'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Installed Version</div>
+                <div class="detail-value">${vuln.InstalledVersion || 'N/A'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Fixed Version</div>
+                <div class="detail-value">${vuln.FixedVersion || 'Not available'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Reference</div>
+                <div class="detail-value">
+                  ${vuln.References && vuln.References.length > 0 
+                    ? `<a href="${vuln.References[0]}" target="_blank" class="text-info">View Details</a>` 
+                    : 'N/A'}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      renderMisconfiguration(misc) {
+        const severityClass = `severity-${misc.Severity.toLowerCase()}`;
+        return `
+          <div class="vulnerability-item">
+            <div class="vuln-header">
+              <span class="vuln-id">${misc.ID}</span>
+              <span class="severity-badge ${severityClass}">${misc.Severity}</span>
+            </div>
+            <div class="vuln-title">${misc.Title || 'No title available'}</div>
+            <div class="vuln-details">
+              <div class="detail-item">
+                <div class="detail-label">Type</div>
+                <div class="detail-value">${misc.Type || 'Configuration'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Category</div>
+                <div class="detail-value">${misc.Category || 'N/A'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Status</div>
+                <div class="detail-value">${misc.Status || 'N/A'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Reference</div>
+                <div class="detail-value">
+                  ${misc.PrimaryURL 
+                    ? `<a href="${misc.PrimaryURL}" target="_blank" class="text-info">View Details</a>` 
+                    : 'N/A'}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      renderSecret(secret) {
+        return `
+          <div class="vulnerability-item">
+            <div class="vuln-header">
+              <span class="vuln-id">SECRET-${secret.RuleID}</span>
+              <span class="severity-badge severity-critical">SECRET</span>
+            </div>
+            <div class="vuln-title">${secret.Title || 'Secret detected'}</div>
+            <div class="vuln-details">
+              <div class="detail-item">
+                <div class="detail-label">Category</div>
+                <div class="detail-value">${secret.Category || 'Secret'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Location</div>
+                <div class="detail-value">${secret.StartLine ? `Line ${secret.StartLine}` : 'N/A'}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      updateScanDate() {
+        document.getElementById('scan-date').textContent = new Date().toLocaleString();
+      }
+
+      showError(message) {
+        const container = document.querySelector('.main-container');
+        container.innerHTML = `
+          <div class="error text-center">
+            <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+            <h3>Error Loading Security Reports</h3>
+            <p>${message}</p>
+            <p>Please ensure the security scan reports are generated and accessible.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Initialize dashboard when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      new SecurityReportDashboard();
+    });
+  </script>
+</body>
+</html>
