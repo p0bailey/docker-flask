@@ -22,15 +22,17 @@ COPY supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 COPY app /var/www/app
 
-RUN mkdir -p /var/log/nginx/app /var/log/supervisor \
+RUN mkdir -p /var/log/nginx/app /var/log/supervisor /tmp/nginx /var/lib/nginx /var/cache/nginx \
     && rm /etc/nginx/sites-enabled/default \
     && ln -s /etc/nginx/sites-available/flask.conf /etc/nginx/sites-enabled/flask.conf \
     && echo "daemon off;" >> /etc/nginx/nginx.conf \
-    && sed -i 's|pid /run/nginx.pid;|pid /var/run/nginx.pid;|' /etc/nginx/nginx.conf \
+    && sed -i 's|pid /run/nginx.pid;|pid /tmp/nginx/nginx.pid;|' /etc/nginx/nginx.conf \
     && uv pip install --system --no-cache --break-system-packages -r /var/www/app/requirements.txt \
     && chown -R appuser:appuser /var/www/app \
     && chown -R appuser:appuser /var/log \
-    && chown -R appuser:appuser /var/run
+    && chown -R appuser:appuser /tmp/nginx \
+    && chown -R appuser:appuser /var/lib/nginx \
+    && chown -R appuser:appuser /var/cache/nginx
 
 EXPOSE 8080
 
