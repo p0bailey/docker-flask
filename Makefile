@@ -7,7 +7,7 @@ PORT = 8080
 
 # Quickstart
 .PHONY: run
-run: build ## Build and run standalone container
+run: clean build ## Build and run standalone container
 	docker run -d --name $(CONTAINER_NAME) -p $(PORT):8080 $(IMAGE_NAME)
 
 # Build targets
